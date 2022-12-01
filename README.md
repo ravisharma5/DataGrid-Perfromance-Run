@@ -98,24 +98,95 @@ Now you can verify if above settings were applied correctly by loading console o
 
 Now, we will need to let our DataGrid VMs notify of other VMs by modifying infinispan.xml file and adding below block.
 
-Replace localhost to your VM's public IP or hostnames.
+Replace localhost to your VM's IP or hostnames. Remember hostnames and IPs should be reachable from other nodes.
 
 Locate infinispan.xml file inside your unziped folder
 ```bash
 vi server/conf/infinispan.xml
 ```
 
-Update file with below block:
+Update file with below block, which defined static members which we specify as initil_hosts and a cache 'respCache' with 2 owners.
 
 ```xml
    <jgroups>
       <stack name="myazure" extends="tcp">
-         <TCPPING initial_hosts="localhost[7800],localhost[7800],localhost[7800]" port_range="3" stack.combine="REPLACE" stack.position="MPING"/>
+         <TCPPING initial_hosts="10.0.3.4[7800],10.0.0.8[7800],10.1.2.3[7800]" port_range="0" stack.combine="REPLACE" stack.position="MPING"/>
       </stack>
    </jgroups>
+   <cache-container name="default" statistics="true">
+      <transport cluster="${infinispan.cluster.name:cluster}" stack="${infinispan.cluster.stack:myazure}" node-name="${infinispan.node.name:}"/>
+      <security>
+         <authorization/>
+      </security>
+      <distributed-cache name="respCache" owners="2" mode="ASYNC" statistics="true">
+         <encoding>
+            <key media-type="application/x-protostream"/>
+            <value media-type="application/x-protostream"/>
+         </encoding>
+         <memory storage="OFF_HEAP" max-size="12GB" when-full="REMOVE"/>
+         <persistence>
+               <file-store/>
+         </persistence>
+      </distributed-cache>
+   </cache-container>
 ```
 
-And now lets start our servers again
+And now lets start our servers again and verify if you see cluster members in the console or logs as in this [screen shot](image.png)
+
+### Add a load balancer to run benchmark tool
+
+You can either user Azurel LB here or bring your own. I went through easy path of using Azure LB.
+
+One thing to note for Azure LB is to make sure you have your VM IPs in Standard SKU and not in Basic SKU. Without having them in Standard SKU, you wont be able to add these VMs in backend pool for Load Balancer which was created in Standard SKU.
+
+## Running Redis-Benchmark tool
+
+Now, lets just setup benchmark tool locally and kick off our perfromance test.
+
+### Install redis-benchmark tool locally
+
+Somewhere in your local directory perfrom below operations to download, unzip and compile to generate redis-benchmark tool.
+
+```bash
+wget http://download.redis.io/releases/redis-7.0.5.tar.gz
+tar xzf redis-7.0.5.tar.gz
+cd src
+make
+```
+Above will compile the source and generate tool under folder redis-benchmark under src folder.
+
+### Run redis-benchmark tool
+
+We will be running this tool with about 1 million requests and perfrom both SET and GET operation using a random key for every operation out of 100k possible keys.
+
+```bash
+./redis-benchmark -t set,get -d 512 -r 100000 -n 1000000 -h {lbIP} -p 11222 --user developer -a developer
+```
+After few minutes you should see results on your console with summary of test run.
+
+for example:
+```bash
+Summary SET Operation:
+  throughput summary: 885.73 requests per second
+  latency summary (msec):
+          avg       min       p50       p95       p99       max
+       56.362    44.192    54.367    64.159   111.167  3000.319
+
+Summary GET Operation:
+  throughput summary: 867.55 requests per second
+  latency summary (msec):
+          avg       min       p50       p95       p99       max
+       57.535    44.096    55.519    70.975   106.047   801.279
+```
+I have uploaded complete results in this github repo.
+
+## Look at the results on Data Grid console
+
+Log in to your console and you can browse the performance test statistics on console.
+
+
+# Thank You and feel free to comment here or reach out if any questions!!!
+
 
 
 
