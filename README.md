@@ -44,7 +44,7 @@ and add below two line at the bottom on the bashrc
 
 ```bash
 export JAVA_HOME=/usr/lib/jvm/jre
-export PATH="$JAVA_HOME/bin:$PATH
+export PATH=$JAVA_HOME/bin:$PATH
 ```
 
 Source and Verify if JAVA_HOME is set
