@@ -68,7 +68,7 @@ Go into unziped folder and create a user for DataGrid
 
 Lets start the server lcoally
 ```bash
-./bin/server.sh -b 0.0.0.0
+./bin/server.sh -b 0.0.0.0 &
 ```
 
 Verify if server started at localhost
@@ -85,10 +85,10 @@ As you can notice in above curl command console is accessible at 11222 port and 
 After you add firewall rules to allow ports 11222 and 7800 on Azure portal for ingress and egress, proceed below to open up firewall from your VM.
 
 ```bash
-sudo firewall-cmd --zone=public --permanent --add-service=http
-sudo firewall-cmd --zone=public --permanent --add-port 11222/tcp
-sudo firewall-cmd --zone=public --permanent --add-port 7800/tcp
-sudo firewall-cmd --reload
+sudo firewall-cmd --zone=public --permanent --add-service=http && \
+sudo firewall-cmd --zone=public --permanent --add-port 11222/tcp && \
+sudo firewall-cmd --zone=public --permanent --add-port 7800/tcp && \
+sudo firewall-cmd --reload && \
 sudo firewall-cmd --list-all
 ```
 
