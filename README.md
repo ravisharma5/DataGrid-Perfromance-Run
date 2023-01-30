@@ -105,12 +105,12 @@ Locate infinispan.xml file inside your unziped folder
 vi server/conf/infinispan.xml
 ```
 
-Update file with below block, which defined static members which we specify as initil_hosts and a cache 'respCache' with 2 owners.
+Update file with below block, which defined static members which we specify as initil_hosts and a cache 'respCache' with 3 owners.
 
 ```xml
    <jgroups>
       <stack name="myazure" extends="tcp">
-         <TCPPING initial_hosts="10.0.3.4[7800],10.0.0.8[7800],10.1.2.3[7800]" port_range="0" stack.combine="REPLACE" stack.position="MPING"/>
+         <TCPPING initial_hosts="10.0.3.4[7800],10.0.0.8[7800],10.1.2.3[7800],10.1.2.4[7800],10.1.3.3[7800]" port_range="0" stack.combine="REPLACE" stack.position="MPING"/>
       </stack>
    </jgroups>
    <cache-container name="default" statistics="true">
@@ -118,12 +118,12 @@ Update file with below block, which defined static members which we specify as i
       <security>
          <authorization/>
       </security>
-      <distributed-cache name="respCache" owners="2" mode="ASYNC" statistics="true">
+      <distributed-cache name="respCache" owners="3" mode="ASYNC" statistics="true">
          <encoding>
             <key media-type="application/x-protostream"/>
             <value media-type="application/x-protostream"/>
          </encoding>
-         <memory storage="OFF_HEAP" max-size="12GB" when-full="REMOVE"/>
+         <memory storage="OFF_HEAP" max-size="48GB" when-full="REMOVE"/>
          <persistence>
                <file-store/>
          </persistence>
