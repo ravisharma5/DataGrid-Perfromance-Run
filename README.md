@@ -125,7 +125,7 @@ Update file with below block, which defined static members which we specify as i
          </encoding>
          <memory storage="OFF_HEAP" max-size="48GB" when-full="REMOVE"/>
          <persistence>
-               <file-store/>
+                 <file-store path="/data/dg"/>
          </persistence>
       </distributed-cache>
    </cache-container>
