@@ -3,7 +3,7 @@ Space where we will setup DataGrid 8.4 on Azure VMs and run some performance tes
 
 ## Compute
 
-For this test run I am using 3 Azure virtual machines with 4 vCPUs and 16GB of RAM. I am also attaching 512 GB of SSD for caching purposes.
+For this test run I am using 5 Azure virtual machines with 4 vCPUs and 64GB of RAM. I am also attaching 2 TB of SSD for caching evicted entries. Idea is to cache entries when we get our OFF_HEAP memory full.
 
 ## Setting up environment for DG servers
 
@@ -52,6 +52,15 @@ Source and Verify if JAVA_HOME is set
 source /etc/bashrc
 printenv | grep JAVA_HOME
 ```
+
+### Mount SSDs to Cache data which gets evicted when OFF_HEAP gets full
+
+Before proceeding make sure that you have SSDs attached to your VM instances. In my example I used 2TB Premium SSD from Azure while creating VMs.
+
+There are many ways you can mount the disk but I followed the procedure outlined here specifically for Azure:
+https://katarinaslama.github.io/2020/02/26/mounting-extra-storage-on-your-VM/
+
+Make sure you verify that correct user permissions are set before proceeding.
 
 ### Download and Install DataGrid package
 
@@ -118,16 +127,19 @@ Update file with below block, which defined static members which we specify as i
       <security>
          <authorization/>
       </security>
-      <distributed-cache name="respCache" owners="3" mode="ASYNC" statistics="true">
+      <replicated-cache name="respCache" mode="ASYNC" statistics="true">
          <encoding>
             <key media-type="application/x-protostream"/>
             <value media-type="application/x-protostream"/>
          </encoding>
          <memory storage="OFF_HEAP" max-size="48GB" when-full="REMOVE"/>
          <persistence>
-                 <file-store path="/data/dg"/>
+            <file-store />
          </persistence>
-      </distributed-cache>
+         <global-state>
+            <persistent-location path="/data/dg"/>
+         </global-state>
+      </replicated-cache>
    </cache-container>
 ```
 
@@ -157,28 +169,27 @@ Above will compile the source and generate tool under folder redis-benchmark und
 
 ### Run redis-benchmark tool
 
-We will be running this tool with about 1 million requests and perfrom both SET and GET operation using a random key for every operation out of 100k possible keys.
+We will be running this tool with about 1 million requests and perfrom both SET and GET operation using a random key for every operation out of 1m possible keys with 120kb of payload.
 
 ```bash
-./redis-benchmark -t set,get -d 512 -r 100000 -n 1000000 -h {lbIP} -p 11222 --user developer -a developer
+./redis-benchmark -t set,get -d 120000 -r 1000000 -n 1000000 -h {lbIP} -p 11222 --user developer -a developer
 ```
 After few minutes you should see results on your console with summary of test run.
 
 for example:
 ```bash
-Summary SET Operation:
-  throughput summary: 885.73 requests per second
+SET Summary:
+  throughput summary: 1228.53 requests per second
   latency summary (msec):
           avg       min       p50       p95       p99       max
-       56.362    44.192    54.367    64.159   111.167  3000.319
+       40.616     0.376    24.415    59.519   499.455  3000.319
 
-Summary GET Operation:
-  throughput summary: 867.55 requests per second
+GET Summary:
+  throughput summary: 10417.86 requests per second
   latency summary (msec):
           avg       min       p50       p95       p99       max
-       57.535    44.096    55.519    70.975   106.047   801.279
+        1.011     0.352     1.007     1.271     1.423   211.839
 ```
-I have uploaded complete results in this github repo.
 
 ## Look at the results on Data Grid console
 
