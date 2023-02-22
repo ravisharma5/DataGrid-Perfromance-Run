@@ -114,7 +114,7 @@ Locate infinispan.xml file inside your unziped folder
 vi server/conf/infinispan.xml
 ```
 
-Update file with below block, which defined static members which we specify as initil_hosts and a cache 'respCache' with 3 owners.
+Update file with below block, which defined static members which we specify as initil_hosts and a cache name 'respCache'.
 
 ```xml
    <jgroups>
@@ -196,7 +196,7 @@ GET Summary:
 Log in to your console and you can browse the performance test statistics on console.
 
 
-# Thank You and feel free to comment here or reach out if any questions!!!
+## Thank You and feel free to comment here or reach out if any questions!!!
 
 
 
