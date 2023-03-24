@@ -136,10 +136,10 @@ Update file with below block, which defined static members which we specify as i
          <persistence>
             <file-store />
          </persistence>
-         <global-state>
-            <persistent-location path="/data/dg"/>
-         </global-state>
       </replicated-cache>
+      <global-state>
+            <persistent-location path="/data/dg"/>
+      </global-state>
    </cache-container>
 ```
 
