@@ -134,7 +134,9 @@ Update file with below block, which defined static members which we specify as i
          </encoding>
          <memory storage="OFF_HEAP" max-size="48GB" when-full="REMOVE"/>
          <persistence>
-            <file-store />
+           <file-store shared="false" open-files-limit="10000">
+              <data max-file-size="167772160"/>
+           </file-store>
          </persistence>
       </replicated-cache>
       <global-state>
