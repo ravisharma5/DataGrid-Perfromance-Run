@@ -16,7 +16,7 @@ LOOP=6
 # Interval in seconds between data points.
 INTERVAL=20
 # Setting the Java Home, by giving the path where your JDK is kept
-JAVA_HOME=/home/jdk1.6.0_21
+# JAVA_HOME=/home/jdk1.6.0_21
 
 for ((i=1; i <= $LOOP; i++))
 do
